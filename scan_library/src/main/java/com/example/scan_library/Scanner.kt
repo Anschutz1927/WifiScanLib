@@ -41,6 +41,17 @@ class Scanner(
     private var lastSuccessResult = listOf<ScanResult>()
     private var disposable: Disposable? = null
 
+    /**
+     * [updateDelay] must be larger than 30L
+     */
+    var updateDelay = 30L
+        set(value) {
+            field = when {
+                value < 30L -> 30L
+                else -> value
+            }
+        }
+
     init {
         lifecycle?.addObserver(this)
     }
@@ -104,9 +115,8 @@ class Scanner(
         }
         registerReceiver(IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION))
         state = State.UPDATED_SCANNING
-        disposable = Flowable.interval(startDelay, 30, TimeUnit.SECONDS)
-            .observeOn(AndroidSchedulers.mainThread())
-            .map {
+        disposable = Flowable.interval(startDelay, updateDelay, TimeUnit.SECONDS)
+            .observeOn(AndroidSchedulers.mainThread()).map {
                 if (state == State.UPDATED_SCANNING && isWifiStateReady() && wifiManager.startScan()) {
                     prefs.edit().putLong(LAST_SCAN_KEY, System.currentTimeMillis()).apply()
                     return@map true

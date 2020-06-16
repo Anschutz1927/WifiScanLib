@@ -49,6 +49,7 @@ class MainActivity : AppCompatActivity() {
             scanner.terminateScan()
             scanner.performWifiScanWithUpdates()
         }
+        scanner.updateDelay = 25L
     }
 
     override fun onStart() {
