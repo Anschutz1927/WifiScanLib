@@ -5,10 +5,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.scan_library.OnWifiScanCallback
-import com.example.scan_library.Scanner
-import com.example.scan_library.checkScannerPermissions
-import com.example.scan_library.requestScannerPermissions
+import com.example.scan_library.*
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -27,17 +24,30 @@ class MainActivity : AppCompatActivity() {
                 scanAdapter.data = data
             }
 
-            override fun onUnsuccessful(e: Exception) {
+            override fun onUnsuccessful(e: Error) {
                 Toast.makeText(
                     this@MainActivity,
-                    "Unsuccessful [${e.localizedMessage}]",
+                    "Unsuccessful [${e.reason}]",
                     Toast.LENGTH_SHORT
                 ).show()
             }
         }
         scanner = Scanner(this, lifecycle, scanCallback)
-        button.setOnClickListener {
-            scanner.performWifiScan()
+        scanAdapter.data = scanner.getLastSuccessResult()
+        var counter = 0
+        button_refresh.setOnClickListener {
+            if (counter < 5) {
+                scanner.terminateScan()
+                scanner.performWifiScan()
+                counter++
+                if (counter == 5) {
+                    lifecycle.removeObserver(scanner)
+                }
+            }
+        }
+        button_subscribe.setOnClickListener {
+            scanner.terminateScan()
+            scanner.performWifiScanWithUpdates()
         }
     }
 
