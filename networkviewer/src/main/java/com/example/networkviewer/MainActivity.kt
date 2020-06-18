@@ -1,13 +1,17 @@
 package com.example.networkviewer
 
 import android.content.pm.PackageManager
-import android.net.wifi.ScanResult
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.scan_library.*
+import com.example.scan_library.Error
+import com.example.scan_library.OnWifiScanCallback
+import com.example.scan_library.Scanner
+import com.example.scan_library.ScannerResult
+import com.example.scan_library.utils.checkScannerPermissions
+import com.example.scan_library.utils.requestScannerPermissions
 import kotlinx.android.synthetic.main.main_activity.*
 
 class MainActivity : AppCompatActivity() {
@@ -23,7 +27,7 @@ class MainActivity : AppCompatActivity() {
         val adapter = ViewerAdapter()
         recycler.adapter = adapter
         val callback = object : OnWifiScanCallback {
-            override fun onSuccess(data: List<ScanResult>) {
+            override fun onSuccess(data: List<ScannerResult>) {
                 if (button_update.isEnabled) {
                     onScanFinished()
                 }
@@ -82,7 +86,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun requestPermissions() {
-        requestScannerPermissions(this, PERMISSIONS_REQUEST_CODE)
+        requestScannerPermissions(
+            this,
+            PERMISSIONS_REQUEST_CODE
+        )
     }
 
     private fun onPermissionsNotGranted() {

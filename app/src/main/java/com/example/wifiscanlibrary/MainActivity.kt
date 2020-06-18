@@ -1,11 +1,15 @@
 package com.example.wifiscanlibrary
 
-import android.net.wifi.ScanResult
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.scan_library.*
+import com.example.scan_library.Error
+import com.example.scan_library.OnWifiScanCallback
+import com.example.scan_library.Scanner
+import com.example.scan_library.ScannerResult
+import com.example.scan_library.utils.checkScannerPermissions
+import com.example.scan_library.utils.requestScannerPermissions
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -20,7 +24,7 @@ class MainActivity : AppCompatActivity() {
         recycler.adapter = scanAdapter
         recycler.layoutManager = LinearLayoutManager(this)
         val scanCallback = object : OnWifiScanCallback {
-            override fun onSuccess(data: List<ScanResult>) {
+            override fun onSuccess(data: List<ScannerResult>) {
                 scanAdapter.data = data
             }
 

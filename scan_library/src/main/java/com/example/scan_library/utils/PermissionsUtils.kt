@@ -1,4 +1,4 @@
-package com.example.scan_library
+package com.example.scan_library.utils
 
 import android.app.Activity
 import android.content.Context

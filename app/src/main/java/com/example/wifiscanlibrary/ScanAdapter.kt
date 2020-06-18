@@ -1,15 +1,15 @@
 package com.example.wifiscanlibrary
 
-import android.net.wifi.ScanResult
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.scan_library.ScannerResult
 import kotlinx.android.synthetic.main.view_item.view.*
 
 class ScanAdapter : RecyclerView.Adapter<ScanAdapter.Holder>() {
 
-    var data: List<ScanResult> = ArrayList()
+    var data: List<ScannerResult> = ArrayList()
         set(value) {
             field = value
             notifyDataSetChanged()
@@ -25,7 +25,7 @@ class ScanAdapter : RecyclerView.Adapter<ScanAdapter.Holder>() {
     }
 
     override fun onBindViewHolder(holder: Holder, position: Int) {
-        holder.itemView.text_name.text = data[position].SSID
+        holder.itemView.text_name.text = data[position].ssid
     }
 
     class Holder(view: View) : RecyclerView.ViewHolder(view)

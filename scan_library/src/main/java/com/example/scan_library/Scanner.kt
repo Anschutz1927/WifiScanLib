@@ -4,17 +4,21 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.net.wifi.ScanResult
 import android.net.wifi.WifiManager
 import android.os.Build
 import android.provider.Settings
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
+import com.example.scan_library.utils.LAST_SCAN_KEY
+import com.example.scan_library.utils.SCAN_DELAY
+import com.example.scan_library.utils.checkScannerPermissions
+import com.example.scan_library.utils.toScannerResult
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.disposables.Disposable
 import java.util.concurrent.TimeUnit
+import java.util.stream.Collectors
 
 class Scanner(
     private val context: Context,
@@ -38,7 +42,7 @@ class Scanner(
         }
     }
     private var state = State.NONE
-    private var lastSuccessResult = listOf<ScanResult>()
+    private var lastSuccessResult = listOf<ScannerResult>()
     private var disposable: Disposable? = null
 
     /**
@@ -56,7 +60,7 @@ class Scanner(
         lifecycle?.addObserver(this)
     }
 
-    fun getLastSuccessResult(): List<ScanResult> {
+    fun getLastSuccessResult(): List<ScannerResult> {
         return lastSuccessResult
     }
 
@@ -151,7 +155,8 @@ class Scanner(
 
     private fun onReceiveScanResult(intent: Intent) {
         if (intent.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false)) {
-            lastSuccessResult = wifiManager.scanResults
+            lastSuccessResult = wifiManager.scanResults.parallelStream()
+                .map { return@map it.toScannerResult() }.collect(Collectors.toList())
             callback.onSuccess(lastSuccessResult)
             if (state != State.UPDATED_SCANNING) {
                 unregisterReceiver()
@@ -225,6 +230,6 @@ enum class Error(val reason: String) {
 }
 
 interface OnWifiScanCallback {
-    fun onSuccess(data: List<ScanResult>)
+    fun onSuccess(data: List<ScannerResult>)
     fun onUnsuccessful(e: Error)
 }
