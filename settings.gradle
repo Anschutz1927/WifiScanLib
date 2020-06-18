@@ -1,3 +1,4 @@
+include ':networkviewer'
 include ':scan_library'
 include ':app'
 rootProject.name = "WifiScanLibrary"

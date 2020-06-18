@@ -131,6 +131,7 @@ class Scanner(
                 }
             ) {
                 terminateScan()
+                sendError(Error.RESULTS_FAILED)
             }
     }
 
@@ -165,10 +166,10 @@ class Scanner(
         if (isWifiStateReady()) {
             if (state == State.ENABLING_AND_SINGLE_UPDATE) {
                 unregisterReceiver()
-                startScanWithUpdates()
+                startScan()
             } else if (state == State.ENABLING_AND_MULTI_UPDATE) {
                 unregisterReceiver()
-                startScan()
+                startScanWithUpdates()
             }
         }
     }
