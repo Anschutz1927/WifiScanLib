@@ -100,25 +100,29 @@ class Scanner(
         }
     }
 
+    fun isScanning(): Boolean {
+        return state != State.NONE
+    }
+
     private fun startScan() {
         registerReceiver(IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION))
         state = State.SCANNING
         if (wifiManager.startScan()) {
             prefs.edit().putLong(LAST_SCAN_KEY, System.currentTimeMillis()).apply()
         } else {
-            sendError(Error.SCAN_FAILED)
             unregisterReceiver()
+            sendError(Error.SCAN_FAILED)
         }
     }
 
     private fun startScanWithUpdates() {
+        state = State.UPDATED_SCANNING
         var startDelay = 0L
         if (!isAllowedByTimeout()) {
             callback.onSuccess(lastSuccessResult)
             startDelay = 30L
         }
         registerReceiver(IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION))
-        state = State.UPDATED_SCANNING
         disposable = Flowable.interval(startDelay, updateDelay, TimeUnit.SECONDS)
             .observeOn(AndroidSchedulers.mainThread()).map {
                 if (state == State.UPDATED_SCANNING && isWifiStateReady() && wifiManager.startScan()) {
@@ -131,11 +135,10 @@ class Scanner(
                 { result -> println("Scan start result = $result") },
                 {
                     it.printStackTrace()
-                    sendError(Error.SCAN_FAILED)
+                    terminateScanWithError(Error.SCAN_FAILED)
                 }
             ) {
-                terminateScan()
-                sendError(Error.RESULTS_FAILED)
+                terminateScanWithError(Error.RESULTS_FAILED)
             }
     }
 
@@ -147,8 +150,8 @@ class Scanner(
             registerReceiver(IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION))
             state = enableWithState
             if (!wifiManager.setWifiEnabled(true)) {
-                sendError(Error.WIFI_ENABLING_ERROR)
                 unregisterReceiver()
+                sendError(Error.WIFI_ENABLING_ERROR)
             }
         }
     }
@@ -157,13 +160,12 @@ class Scanner(
         if (intent.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false)) {
             lastSuccessResult = wifiManager.scanResults.parallelStream()
                 .map { return@map it.toScannerResult() }.collect(Collectors.toList())
-            callback.onSuccess(lastSuccessResult)
             if (state != State.UPDATED_SCANNING) {
                 unregisterReceiver()
             }
+            callback.onSuccess(lastSuccessResult)
         } else {
-            sendError(Error.RESULTS_FAILED)
-            terminateScan()
+            terminateScanWithError(Error.RESULTS_FAILED)
         }
     }
 
@@ -205,6 +207,11 @@ class Scanner(
             context.unregisterReceiver(wifiActionReceiver)
             state = State.NONE
         }
+    }
+
+    private fun terminateScanWithError(e: Error) {
+        terminateScan()
+        sendError(e)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)

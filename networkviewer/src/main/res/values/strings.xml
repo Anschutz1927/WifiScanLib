@@ -3,4 +3,6 @@
     <string name="scan_wifi">Scan wifi</string>
     <string name="periodic_scan">Periodic scan</string>
     <string name="permissions_notification">The application needs permissions to work properly</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

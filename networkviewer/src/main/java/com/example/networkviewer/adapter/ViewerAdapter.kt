@@ -1,9 +1,10 @@
-package com.example.networkviewer
+package com.example.networkviewer.adapter
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.networkviewer.R
 import com.example.scan_library.ScannerResult
 import kotlinx.android.synthetic.main.item_details.view.*
 
@@ -15,9 +16,14 @@ class ViewerAdapter : RecyclerView.Adapter<ViewerAdapter.Holder>() {
             notifyDataSetChanged()
         }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder = Holder(
-        LayoutInflater.from(parent.context).inflate(R.layout.item_details, parent, false)
-    )
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder =
+        Holder(
+            LayoutInflater.from(parent.context).inflate(
+                R.layout.item_details,
+                parent,
+                false
+            )
+        )
 
     override fun getItemCount(): Int = data.size
 
